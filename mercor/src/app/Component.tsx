@@ -24,9 +24,42 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 
+interface WorkExperience {
+  roleName: string;
+  company: string;
+}
+
+interface Education {
+  highest_level: string;
+  degrees: Array<{
+    subject: string;
+    school: string;
+    originalSchool?: string;
+  }>;
+}
+
+interface Candidate {
+  name: string;
+  location: string;
+  work_experiences: WorkExperience[];
+  education: Education;
+  skills: string[];
+  annual_salary_expectation: {
+    "full-time": string;
+  };
+  work_availability: string[];
+}
+
+interface MatchResult {
+  candidate: Candidate;
+  reasons: string[];
+  uniqueStrengths: string[];
+  complementsTeam: string;
+}
+
 export default function JobCandidateMatcher() {
   const [requirements, setRequirements] = useState("");
-  const [matchedCandidates, setMatchedCandidates] = useState([]);
+  const [matchedCandidates, setMatchedCandidates] = useState<MatchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
@@ -78,7 +111,11 @@ export default function JobCandidateMatcher() {
       setTimeout(() => setProgress(0), 500);
       setIsLoading(false);
     } catch (err) {
-      setError(`Error matching candidates: ${err.message}`);
+      setError(
+        `Error matching candidates: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
       setIsLoading(false);
       setProgress(0);
     }
@@ -167,7 +204,7 @@ export default function JobCandidateMatcher() {
                     <ul className="text-sm space-y-1">
                       {result.candidate.work_experiences
                         .slice(0, 3)
-                        .map((exp, i) => (
+                        .map((exp: WorkExperience, i: number) => (
                           <li key={i}>
                             {exp.roleName} at {exp.company}
                           </li>
